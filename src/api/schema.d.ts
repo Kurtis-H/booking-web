@@ -227,6 +227,11 @@ export interface components {
         OrderItemOut: {
             /** Seat Id */
             seat_id: number;
+            /**
+             * Label
+             * @description The seat as buyers know it, such as "R3-12".
+             */
+            label: string;
             /** Price Cents */
             price_cents: number;
         };

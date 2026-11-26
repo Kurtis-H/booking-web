@@ -101,7 +101,7 @@ export const handlers = [
       owner,
       total_cents: seats.reduce((sum, s) => sum + s!.price_cents, 0),
       created_at: new Date(Date.UTC(2026, 10, 26, 15)).toISOString(),
-      items: seats.map((s) => ({ seat_id: s!.id, price_cents: s!.price_cents })),
+      items: seats.map((s) => ({ seat_id: s!.id, label: s!.label, price_cents: s!.price_cents })),
     };
     db.orders.push(order);
     return HttpResponse.json(publicOrder(order), { status: 201 });

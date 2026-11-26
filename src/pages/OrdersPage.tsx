@@ -75,7 +75,7 @@ export function OrderPage() {
         <tbody>
           {order.data.items.map((item) => (
             <tr key={item.seat_id}>
-              <td>#{item.seat_id}</td>
+              <td>{item.label}</td>
               <td>{formatCents(item.price_cents)}</td>
             </tr>
           ))}

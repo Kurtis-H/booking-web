@@ -35,6 +35,8 @@ test.describe("buying", () => {
 
     await expect(page.getByTestId("order-confirmation")).toBeVisible();
     await expect(page.getByTestId("order-detail-total")).toHaveText("$70.00");
+    await expect(page.getByRole("cell", { name: "S-1", exact: true })).toBeVisible();
+    await expect(page.getByRole("cell", { name: "S-2", exact: true })).toBeVisible();
     const orderHeading = await page.getByRole("heading", { level: 1 }).textContent();
 
     await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "My orders" }).click();
