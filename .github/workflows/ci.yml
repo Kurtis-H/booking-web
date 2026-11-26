@@ -45,7 +45,7 @@ jobs:
       API_URL: http://localhost:8000
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - name: Start the booking API (api-performance-lab, every fix on)
@@ -89,7 +89,7 @@ jobs:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/booking
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - name: Start the booking API
