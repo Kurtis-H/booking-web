@@ -1,4 +1,5 @@
 import type { Seat } from "../api/client";
+import { plantedBug } from "./plantedBug";
 
 /** The API accepts at most 10 seats per order. */
 export const MAX_SEATS_PER_ORDER = 10;
@@ -25,6 +26,10 @@ export function toggleSeat(selected: readonly number[], seatId: number): ToggleR
 /** Sum the prices of the selected seats. Unknown ids are ignored. */
 export function totalCents(seats: readonly Seat[], selected: readonly number[]): number {
   const wanted = new Set(selected);
+  if (plantedBug() === "total") {
+    // Planted on purpose for test-sensitivity runs; see plantedBug.ts.
+    return seats.find((seat) => wanted.has(seat.id))?.price_cents ?? 0;
+  }
   return seats.reduce((sum, seat) => (wanted.has(seat.id) ? sum + seat.price_cents : sum), 0);
 }
 
