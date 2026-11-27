@@ -62,6 +62,7 @@ Sign in with an API key from the seed data (`key-user-1` ... `key-user-200`), or
 Every push and pull request runs:
 
 * **Lint, types and unit tests:** ESLint, `tsc`, Vitest with coverage, the Pact consumer contract (and a check that the committed contract is current), build, `npm audit`
+* **Contract holds against the current API:** this branch's Pact contract, verified by api-performance-lab's provider test
 * **End-to-end against the real API:** installs api-performance-lab, starts Postgres and the API, runs Playwright on desktop and mobile
 * **Types match the API's OpenAPI spec:** regenerates the types from the running API and fails on any difference
 * **CodeQL** for the TypeScript and the workflows; Dependabot for npm and Actions
@@ -81,7 +82,12 @@ e2e/            Playwright specs and fixtures
 
 [`contract/booking-api.pact.test.ts`](contract/booking-api.pact.test.ts) records each call the app makes, through `src/api/client.ts`, against Pact's mock server, and writes [`pacts/booking-web-booking-api.json`](pacts/booking-web-booking-api.json). It holds only the fields the app reads, so the API can add fields or change ones the app ignores.
 
-[api-performance-lab](https://github.com/Kurtis-H/api-performance-lab) checks out this repo and replays that file against the real API on every change, so an API change that would break this app fails the API's own pull request. Provider states such as "an event with available seats exists" create their data there and hand back the real ids.
+It's checked from both sides:
+
+* [api-performance-lab](https://github.com/Kurtis-H/api-performance-lab) checks out this repo and replays the committed file against the real API on every change, so an API change that would break this app fails the API's own pull request.
+* This repo's **Contract holds against the current API** job generates the contract from the branch and runs the API's own provider test on it, so a contract change here is verified before it's merged.
+
+Provider states such as "an event with available seats exists" create their data on the API side and hand back the real ids.
 
 ```bash
 npm run test:contract     # regenerates pacts/; CI fails if the committed file differs

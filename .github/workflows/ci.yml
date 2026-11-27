@@ -32,6 +32,53 @@ jobs:
       - name: Dependency audit
         run: npm audit --audit-level=high
 
+  pact:
+    name: Contract holds against the current API
+    # The API replays this app's contract from main on every API change. This
+    # job checks the other direction: a change to the contract here is verified
+    # against the API before it's merged.
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: booking
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 2s --health-timeout 5s --health-retries 30
+    env:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/booking
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ github.repository_owner }}/api-performance-lab
+          path: api
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Generate this branch's contract
+        run: npm run test:contract
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - run: pip install -e "./api[dev]"
+      - name: Verify it against the API's main branch with the API's own provider test
+        working-directory: api
+        env:
+          REQUIRE_PACTS: "1"
+        run: |
+          mkdir -p consumers/booking-web/pacts
+          cp ../pacts/*.json consumers/booking-web/pacts/
+          python -m pytest tests/api/test_consumer_contracts.py -v -p no:cacheprovider
+
   e2e:
     name: End-to-end against the real API
     runs-on: ubuntu-latest
