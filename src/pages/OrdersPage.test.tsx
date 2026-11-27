@@ -29,6 +29,15 @@ describe("OrdersPage", () => {
     expect(screen.queryByTestId("order-confirmation")).not.toBeInTheDocument();
   });
 
+  it("names each seat the way the buyer saw it", async () => {
+    const order = await api.createOrder([2, 3], "key-user-1");
+    renderApp(`/orders/${order.id}`, { apiKey: "key-user-1" });
+    const seats = await screen.findAllByRole("row");
+    // header, two seats, total
+    expect(seats.map((r) => r.textContent)).toEqual(["SeatPrice", "R1-2$25.00", "R1-3$25.00", "Total$50.00"]);
+    expect(screen.queryByText("#2")).not.toBeInTheDocument();
+  });
+
   it("won't show someone else's order", async () => {
     await api.createOrder([4], "key-user-2");
     renderApp("/orders/1", { apiKey: "key-user-1" });
