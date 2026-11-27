@@ -28,6 +28,7 @@ A React and TypeScript web app for buying event seats. It is the front end for t
 | Component | Vitest + Testing Library + MSW | Every page through the whole app, against an in-memory fake of the API that follows the real API's rules (401, 404, 409) |
 | End to end | Playwright, desktop and mobile | The built app against the **real** API and Postgres: buy seats, lose a seat to another buyer, can't read someone else's order |
 | Accessibility | axe-core in Playwright | No WCAG 2.1 A/AA violations on any main screen, plus a keyboard-only purchase |
+| Security headers | Playwright | CSP and framing protection are sent, and a whole purchase causes no policy violation |
 | Contract | openapi-typescript | Types are generated from the API's OpenAPI spec. CI regenerates them from the live API and fails if the API has changed shape |
 | Consumer contract | Pact | What this app needs from the API: 9 interactions recorded through the app's own client, including the 401, 404 and 409 it handles. The API's CI replays them (see below) |
 | Static | TypeScript strict, ESLint (incl. jsx-a11y), CodeQL, npm audit | |
@@ -92,6 +93,19 @@ Provider states such as "an event with available seats exists" create their data
 ```bash
 npm run test:contract     # regenerates pacts/; CI fails if the committed file differs
 ```
+
+## Security headers
+
+The production build ships a Content-Security-Policy, both in `index.html` and as a header from `vite preview`, plus framing protection (from [booking-pentest](https://github.com/Kurtis-H/booking-pentest) finding BP-07). Wherever the built files are hosted, send these headers (they're defined once, in [`vite.config.ts`](vite.config.ts)):
+
+| Header | Value | Why |
+|---|---|---|
+| `Content-Security-Policy` | `default-src 'self'` and the rest of `CSP`, plus `frame-ancestors 'none'` | Only this origin's scripts, styles and API; no framing |
+| `X-Frame-Options` | `DENY` | Framing protection for older browsers |
+| `X-Content-Type-Options` | `nosniff` | No MIME sniffing |
+| `Referrer-Policy` | `no-referrer` | Event and order ids in URLs stay on this site |
+
+`frame-ancestors` only works as a header, not in the `<meta>` tag, so a host that serves the files without these headers is still frameable. [`e2e/security-headers.spec.ts`](e2e/security-headers.spec.ts) checks the headers and that a whole purchase runs without a single policy violation. As a control, it also checks that an inline script *is* blocked.
 
 ## Planted bug for test-sensitivity runs
 
