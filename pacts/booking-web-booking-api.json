@@ -1,0 +1,953 @@
+{
+  "consumer": {
+    "name": "booking-web"
+  },
+  "interactions": [
+    {
+      "description": "a request for an event",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "an event with available seats exists"
+        }
+      ],
+      "request": {
+        "generators": {
+          "path": {
+            "expression": "/events/${eventId}",
+            "type": "ProviderState"
+          }
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "path": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        },
+        "method": "GET",
+        "path": "/events/1"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "available_seats": 4,
+            "id": 1,
+            "name": "Summer concert",
+            "starts_at": "2027-06-01T19:00:00+00:00",
+            "venue": "Main hall"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.available_seats": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.starts_at": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.venue": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for an event's seats",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "an event with available seats exists"
+        }
+      ],
+      "request": {
+        "generators": {
+          "path": {
+            "expression": "/events/${eventId}/seats",
+            "type": "ProviderState"
+          }
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "path": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        },
+        "method": "GET",
+        "path": "/events/1/seats",
+        "query": {
+          "limit": [
+            "100"
+          ],
+          "offset": [
+            "0"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "content": {
+            "items": [
+              {
+                "id": 1,
+                "label": "R1-1",
+                "price_cents": 3500,
+                "status": "available"
+              }
+            ],
+            "offset": 0
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.items": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.items[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.items[*].label": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.items[*].price_cents": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.items[*].status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "available|sold"
+                }
+              ]
+            },
+            "$.offset": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for one of the buyer's orders",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the buyer has an order"
+        }
+      ],
+      "request": {
+        "generators": {
+          "path": {
+            "expression": "/orders/${orderId}",
+            "type": "ProviderState"
+          }
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "X-API-Key": [
+            "key-user-98"
+          ]
+        },
+        "matchingRules": {
+          "path": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        },
+        "method": "GET",
+        "path": "/orders/1"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "created_at": "2026-11-27T16:00:00.000000+00:00",
+            "id": 1,
+            "items": [
+              {
+                "label": "R1-1",
+                "price_cents": 3500,
+                "seat_id": 1
+              }
+            ],
+            "total_cents": 3500
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.created_at": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.items": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.items[*].label": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.items[*].price_cents": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.items[*].seat_id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.total_cents": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for orders with an unknown key",
+      "pending": false,
+      "request": {
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "X-API-Key": [
+            "key-does-not-exist"
+          ]
+        },
+        "method": "GET",
+        "path": "/orders",
+        "query": {
+          "limit": [
+            "50"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "content": {
+            "detail": "Something went wrong"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.detail": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 401
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for the buyer's orders",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the buyer has an order"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "X-API-Key": [
+            "key-user-98"
+          ]
+        },
+        "method": "GET",
+        "path": "/orders",
+        "query": {
+          "limit": [
+            "50"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "content": {
+            "items": [
+              {
+                "created_at": "2026-11-27T16:00:00.000000+00:00",
+                "id": 1,
+                "items": [
+                  {
+                    "label": "R1-1",
+                    "price_cents": 3500,
+                    "seat_id": 1
+                  }
+                ],
+                "total_cents": 3500
+              }
+            ]
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.items": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.items[*].created_at": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.items[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.items[*].items": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.items[*].items[*].label": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.items[*].items[*].price_cents": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.items[*].items[*].seat_id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.items[*].total_cents": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for the first page of events",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "events exist"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Accept": [
+            "application/json"
+          ]
+        },
+        "method": "GET",
+        "path": "/events",
+        "query": {
+          "limit": [
+            "12"
+          ],
+          "offset": [
+            "0"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "content": {
+            "items": [
+              {
+                "available_seats": 4,
+                "id": 1,
+                "name": "Summer concert",
+                "starts_at": "2027-06-01T19:00:00+00:00",
+                "venue": "Main hall"
+              }
+            ],
+            "offset": 0,
+            "total": 30
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.items": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.items[*].available_seats": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.items[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.items[*].name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.items[*].starts_at": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.items[*].venue": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.offset": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.total": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json.*"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request from another buyer for that order",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the buyer has an order"
+        }
+      ],
+      "request": {
+        "generators": {
+          "path": {
+            "expression": "/orders/${orderId}",
+            "type": "ProviderState"
+          }
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "X-API-Key": [
+            "key-user-99"
+          ]
+        },
+        "matchingRules": {
+          "path": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        },
+        "method": "GET",
+        "path": "/orders/1"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "detail": "Something went wrong"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.detail": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 404
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "an order for a seat that is already sold",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "a seat has already been sold"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "seat_ids": [
+              1
+            ]
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.seat_ids[0]": {
+              "expression": "${seatId}",
+              "type": "ProviderState"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ],
+          "X-API-Key": [
+            "key-user-98"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.seat_ids[0]": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/orders"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "detail": "Something went wrong"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.detail": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 409
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "an order for an available seat",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "an event with available seats exists"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "seat_ids": [
+              1
+            ]
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "generators": {
+          "body": {
+            "$.seat_ids[0]": {
+              "expression": "${seatId}",
+              "type": "ProviderState"
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ],
+          "X-API-Key": [
+            "key-user-98"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.seat_ids[0]": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/orders"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "created_at": "2026-11-27T16:00:00.000000+00:00",
+            "id": 1,
+            "items": [
+              {
+                "label": "R1-1",
+                "price_cents": 3500,
+                "seat_id": 1
+              }
+            ],
+            "total_cents": 3500
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.created_at": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.items": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.items[*].label": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.items[*].price_cents": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.items[*].seat_id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.total_cents": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      },
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "17.1.4"
+    },
+    "pactRust": {
+      "ffi": "0.5.8",
+      "models": "1.3.16"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "booking-api"
+  }
+}

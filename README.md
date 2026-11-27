@@ -29,6 +29,7 @@ A React and TypeScript web app for buying event seats. It is the front end for t
 | End to end | Playwright, desktop and mobile | The built app against the **real** API and Postgres: buy seats, lose a seat to another buyer, can't read someone else's order |
 | Accessibility | axe-core in Playwright | No WCAG 2.1 A/AA violations on any main screen, plus a keyboard-only purchase |
 | Contract | openapi-typescript | Types are generated from the API's OpenAPI spec. CI regenerates them from the live API and fails if the API has changed shape |
+| Consumer contract | Pact | What this app needs from the API: 9 interactions recorded through the app's own client, including the 401, 404 and 409 it handles. The API's CI replays them (see below) |
 | Static | TypeScript strict, ESLint (incl. jsx-a11y), CodeQL, npm audit | |
 
 Unit and component tests need 80% coverage to pass (currently about 98% of lines). Tests use roles and accessible names first (`getByRole("button", { name: "Buy 2 seats" })`), and `data-testid` only for things with no natural role, like the order summary.
@@ -60,7 +61,7 @@ Sign in with an API key from the seed data (`key-user-1` ... `key-user-200`), or
 
 Every push and pull request runs:
 
-* **Lint, types and unit tests:** ESLint, `tsc`, Vitest with coverage, build, `npm audit`
+* **Lint, types and unit tests:** ESLint, `tsc`, Vitest with coverage, the Pact consumer contract (and a check that the committed contract is current), build, `npm audit`
 * **End-to-end against the real API:** installs api-performance-lab, starts Postgres and the API, runs Playwright on desktop and mobile
 * **Types match the API's OpenAPI spec:** regenerates the types from the running API and fails on any difference
 * **CodeQL** for the TypeScript and the workflows; Dependabot for npm and Actions
@@ -74,6 +75,16 @@ src/pages/      one file per screen, each with its .test.tsx
 src/components/ layout, seat map, loading and error states
 src/test/       MSW fake API and test helpers
 e2e/            Playwright specs and fixtures
+```
+
+## Consumer contract
+
+[`contract/booking-api.pact.test.ts`](contract/booking-api.pact.test.ts) records each call the app makes, through `src/api/client.ts`, against Pact's mock server, and writes [`pacts/booking-web-booking-api.json`](pacts/booking-web-booking-api.json). It holds only the fields the app reads, so the API can add fields or change ones the app ignores.
+
+[api-performance-lab](https://github.com/Kurtis-H/api-performance-lab) checks out this repo and replays that file against the real API on every change, so an API change that would break this app fails the API's own pull request. Provider states such as "an event with available seats exists" create their data there and hand back the real ids.
+
+```bash
+npm run test:contract     # regenerates pacts/; CI fails if the committed file differs
 ```
 
 ## Planted bug for test-sensitivity runs

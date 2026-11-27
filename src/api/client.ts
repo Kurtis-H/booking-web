@@ -21,7 +21,8 @@ export class ApiError extends Error {
   }
 }
 
-const BASE = import.meta.env.VITE_API_BASE ?? "/api";
+/** Read per request, so the contract tests can point it at Pact's mock server. */
+const base = (): string => import.meta.env.VITE_API_BASE ?? "/api";
 
 type RequestOptions = {
   method?: "GET" | "POST";
@@ -35,7 +36,7 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   if (options.body !== undefined) headers["Content-Type"] = "application/json";
   if (options.apiKey) headers["X-API-Key"] = options.apiKey;
 
-  const url = new URL(BASE + path, window.location.origin);
+  const url = new URL(base() + path, window.location.origin);
   const response = await fetch(url, {
     method: options.method ?? "GET",
     headers,
