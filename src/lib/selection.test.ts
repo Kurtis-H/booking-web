@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Seat } from "../api/client";
 import { groupByRow, MAX_SEATS_PER_ORDER, toggleSeat, totalCents } from "./selection";
 
@@ -62,5 +62,29 @@ describe("groupByRow", () => {
 
   it("handles labels without a dash", () => {
     expect([...groupByRow([seat(1, "A")]).keys()]).toEqual(["A"]);
+  });
+});
+
+describe("the planted bug switch (used by framework-showdown)", () => {
+  const seats = [seat(1, "R1-1", 2500), seat(2, "R1-2", 3000)];
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("does nothing in a normal build", () => {
+    expect(import.meta.env.VITE_PLANTED_BUG).toBeFalsy();
+    expect(totalCents(seats, [1, 2])).toBe(5500);
+  });
+
+  it("with VITE_PLANTED_BUG=total, the total counts only the first seat", () => {
+    vi.stubEnv("VITE_PLANTED_BUG", "total");
+    expect(totalCents(seats, [1, 2])).toBe(2500);
+    expect(totalCents(seats, [])).toBe(0);
+  });
+
+  it("ignores any other value", () => {
+    vi.stubEnv("VITE_PLANTED_BUG", "something-else");
+    expect(totalCents(seats, [1, 2])).toBe(5500);
   });
 });
