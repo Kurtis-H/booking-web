@@ -1,7 +1,7 @@
-import { http, HttpResponse } from "msw";
+import { delay, http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { server } from "../test/setup";
-import { api, ApiError, request } from "./client";
+import { api, ApiError, REQUEST_TIMEOUT_MS, RequestTimeoutError, request } from "./client";
 
 describe("request", () => {
   it("sends the API key and JSON body", async () => {
@@ -25,7 +25,7 @@ describe("request", () => {
     await expect(request("/x")).rejects.toMatchObject({ status: 409, message: "Nope" });
   });
 
-  it("summarises validation errors instead of showing raw detail", async () => {
+  it("summarizes validation errors instead of showing raw detail", async () => {
     server.use(
       http.get("*/api/x", () => HttpResponse.json({ detail: [{ loc: ["body"] }] }, { status: 422 })),
     );
@@ -46,6 +46,37 @@ describe("request", () => {
     const error = await request("/x").catch((e: unknown) => e);
     expect(error).toBeInstanceOf(ApiError);
     expect((error as ApiError).retryAfterSeconds).toBe(12);
+  });
+
+  it("gives up on an API that doesn't answer", async () => {
+    server.use(
+      http.get("*/api/x", async () => {
+        await delay("infinite");
+        return HttpResponse.json({});
+      }),
+    );
+    const started = Date.now();
+    await expect(request("/x", { timeoutMs: 50 })).rejects.toBeInstanceOf(RequestTimeoutError);
+    expect(Date.now() - started).toBeLessThan(2_000);
+  });
+
+  it("has a time limit by default", () => {
+    expect(REQUEST_TIMEOUT_MS).toBe(10_000);
+  });
+
+  it("still lets the caller cancel, which isn't a timeout", async () => {
+    server.use(
+      http.get("*/api/x", async () => {
+        await delay("infinite");
+        return HttpResponse.json({});
+      }),
+    );
+    const controller = new AbortController();
+    const pending = request("/x", { signal: controller.signal });
+    controller.abort();
+    const error = await pending.catch((e: unknown) => e);
+    expect(error).not.toBeInstanceOf(RequestTimeoutError);
+    expect((error as Error).name).toBe("AbortError");
   });
 
   it("copes with an error body that isn't JSON", async () => {

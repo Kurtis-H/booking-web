@@ -94,6 +94,13 @@ Provider states such as "an event with available seats exists" create their data
 npm run test:contract     # regenerates pacts/; CI fails if the committed file differs
 ```
 
+## Resilience
+
+[resilience-lab](https://github.com/Kurtis-H/resilience-lab) found that a silent API left pages loading forever (RL-04). Every request now has a 10 second limit (`REQUEST_TIMEOUT_MS` in [`src/api/client.ts`](src/api/client.ts)), covering both the response and its body:
+
+- A page that times out shows its usual load error, after one retry.
+- An order that times out, or gets a `503`, may still have gone through, so the message says so and points to "My orders" before trying again. Orders are never retried automatically.
+
 ## Security headers
 
 The production build ships a Content-Security-Policy, both in `index.html` and as a header from `vite preview`, plus framing protection (from [booking-pentest](https://github.com/Kurtis-H/booking-pentest) finding BP-07). Wherever the built files are hosted, send these headers (they're defined once, in [`vite.config.ts`](vite.config.ts)):
