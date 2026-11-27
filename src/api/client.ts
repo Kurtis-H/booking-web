@@ -21,6 +21,20 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * How long a request may take before the app gives up on it, so a silent
+ * API shows an error instead of loading forever (resilience-lab RL-04).
+ */
+export const REQUEST_TIMEOUT_MS = 10_000;
+
+/** The API didn't answer in time. For an order, the outcome is unknown. */
+export class RequestTimeoutError extends Error {
+  constructor() {
+    super("The booking service took too long to answer.");
+    this.name = "RequestTimeoutError";
+  }
+}
+
 /** Read per request, so the contract tests can point it at Pact's mock server. */
 const base = (): string => import.meta.env.VITE_API_BASE ?? "/api";
 
@@ -29,6 +43,8 @@ type RequestOptions = {
   body?: unknown;
   apiKey?: string | null;
   signal?: AbortSignal;
+  /** Overrides REQUEST_TIMEOUT_MS; for tests. */
+  timeoutMs?: number;
 };
 
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -37,17 +53,37 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   if (options.apiKey) headers["X-API-Key"] = options.apiKey;
 
   const url = new URL(base() + path, window.location.origin);
-  const response = await fetch(url, {
-    method: options.method ?? "GET",
-    headers,
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
-    signal: options.signal,
-  });
 
-  if (!response.ok) {
-    throw await toApiError(response);
+  // One signal for both reasons to stop: the caller's (a page that's gone)
+  // and the time limit, which covers reading the body as well.
+  const controller = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, options.timeoutMs ?? REQUEST_TIMEOUT_MS);
+  const forwardAbort = () => controller.abort(options.signal?.reason);
+  if (options.signal?.aborted) forwardAbort();
+  options.signal?.addEventListener("abort", forwardAbort, { once: true });
+
+  try {
+    const response = await fetch(url, {
+      method: options.method ?? "GET",
+      headers,
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      throw await toApiError(response);
+    }
+    return (await response.json()) as T;
+  } catch (error) {
+    if (timedOut) throw new RequestTimeoutError();
+    throw error;
+  } finally {
+    clearTimeout(timer);
+    options.signal?.removeEventListener("abort", forwardAbort);
   }
-  return (await response.json()) as T;
 }
 
 async function toApiError(response: Response): Promise<ApiError> {
