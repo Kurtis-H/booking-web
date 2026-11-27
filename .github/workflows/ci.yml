@@ -32,7 +32,7 @@ jobs:
       - name: Dependency audit
         run: npm audit --audit-level=high
 
-  contract:
+  pact:
     name: Contract holds against the current API
     # The API replays this app's contract from main on every API change. This
     # job checks the other direction: a change to the contract here is verified
