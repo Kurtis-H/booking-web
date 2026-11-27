@@ -18,7 +18,7 @@ A React and TypeScript web app for buying event seats. It is the front end for t
   * **Someone else buys your seat first (409):** explain, refresh the seat map and clear the selection.
   * **Rate limited (429):** say how long to wait (from `Retry-After`) and keep the selection.
   * **Session ended (401)**, **missing event or order (404)**, **network failure**: a clear message every time, never a blank screen.
-* Keyboard and screen-reader friendly: every seat is a labelled toggle button ("Seat R2-5, $30.00", `aria-pressed`), rows are grouped, errors are announced.
+* Keyboard and screen-reader friendly: every seat is a labeled toggle button ("Seat R2-5, $30.00", `aria-pressed`), rows are grouped, errors are announced.
 
 ## How it's tested
 
@@ -76,6 +76,6 @@ src/test/       MSW fake API and test helpers
 e2e/            Playwright specs and fixtures
 ```
 
-## Known gaps
+## Planted bug for test-sensitivity runs
 
-* Order details list seat ids, not labels, because the API's order response doesn't include labels yet. The fix belongs in the API, and the contract check will flag the change when it lands.
+[framework-showdown](https://github.com/Kurtis-H/framework-showdown) needs to prove its suites can fail. Building with `VITE_PLANTED_BUG=total` switches on one bug in [`src/lib/plantedBug.ts`](src/lib/plantedBug.ts): the order total counts only the first seat. It's off unless that variable is set at build time, and a unit test covers both settings.
