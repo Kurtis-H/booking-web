@@ -24,7 +24,7 @@ A React and TypeScript web app for buying event seats. It is the front end for t
 
 | Layer | Tool | What it checks |
 |---|---|---|
-| Unit | Vitest | Seat selection rules (10-seat limit, totals, rows), money and date formatting, error messages, the API client |
+| Unit | Vitest | Seat selection rules (10-seat limit, totals, rows), money and date formatting, error messages, the API client and its 10 second time limit |
 | Component | Vitest + Testing Library + MSW | Every page through the whole app, against an in-memory fake of the API that follows the real API's rules (401, 404, 409) |
 | End to end | Playwright, desktop and mobile | The built app against the **real** API and Postgres: buy seats, lose a seat to another buyer, can't read someone else's order |
 | Accessibility | axe-core in Playwright | No WCAG 2.1 A/AA violations on any main screen, plus a keyboard-only purchase |
@@ -77,6 +77,8 @@ src/pages/      one file per screen, each with its .test.tsx
 src/components/ layout, seat map, loading and error states
 src/test/       MSW fake API and test helpers
 e2e/            Playwright specs and fixtures
+contract/       the Pact consumer test; pacts/ holds the contract file it writes
+docs/           screenshots for this README
 ```
 
 ## Consumer contract
