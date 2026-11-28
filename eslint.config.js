@@ -5,7 +5,7 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", "coverage", "playwright-report", "test-results", "src/api/schema.d.ts"] },
+  { ignores: ["dist", "coverage", "playwright-report", "test-results", "visual-report", "visual-results", "src/api/schema.d.ts"] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   jsxA11y.flatConfigs.recommended,
@@ -17,6 +17,10 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
     },
+  },
+  {
+    files: ["scripts/**/*.mjs"],
+    languageOptions: { globals: globals.node },
   },
   {
     // Playwright fixtures call use(), which isn't React's use() hook.

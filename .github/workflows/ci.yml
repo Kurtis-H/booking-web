@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+    inputs:
+      update_visual_baselines:
+        description: "Make new visual baselines and upload them as an artifact to review and commit"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -123,6 +129,44 @@ jobs:
             playwright-report/
             test-results/
             api.log
+
+  visual:
+    name: Visual regression
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Make new baselines
+        if: inputs.update_visual_baselines
+        run: npm run visual:update
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: inputs.update_visual_baselines
+        with:
+          name: visual-baselines
+          path: visual/__screenshots__/
+      - name: Print the new baselines (for environments that can read logs but not artifacts)
+        if: inputs.update_visual_baselines
+        run: |
+          echo "----- BEGIN VISUAL BASELINES (tar.gz, base64) -----"
+          tar czf - visual/__screenshots__ | base64 -w 0
+          echo
+          echo "----- END VISUAL BASELINES -----"
+      - name: Compare every screen with its approved screenshot
+        run: npm run visual
+      - name: Prove planted styling regressions are caught
+        run: node scripts/prove-visual.mjs
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: visual-diffs
+          path: |
+            visual-report/
+            visual-results/
 
   contract:
     name: Types match the API's OpenAPI spec

@@ -6,3 +6,5 @@ test-results/
 blob-report/
 *.log
 .env
+visual-report/
+visual-results/
