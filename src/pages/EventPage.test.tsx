@@ -16,6 +16,32 @@ describe("EventPage", () => {
     expect(screen.getByRole("group", { name: "Row 2" })).toBeInTheDocument();
   });
 
+  it("lays the venue out in sections, each with its price", async () => {
+    renderApp("/events/1");
+    const orchestra = await screen.findByRole("region", { name: "Orchestra" });
+    const balcony = screen.getByRole("region", { name: "Balcony" });
+    expect(within(orchestra).getByText("$25.00")).toBeInTheDocument();
+    expect(within(orchestra).getByRole("group", { name: "Row 1" })).toBeInTheDocument();
+    expect(within(balcony).getByRole("group", { name: "Row 2" })).toBeInTheDocument();
+    expect(within(balcony).getByRole("button", { name: "Seat R2-1, $30.00" })).toBeInTheDocument();
+  });
+
+  it("names the section of each seat in the order", async () => {
+    const { user } = renderApp("/events/1", { apiKey: "key-user-1" });
+    await user.click(await seatButton("R2-1"));
+    expect(within(screen.getByTestId("order-summary")).getByRole("listitem")).toHaveTextContent(
+      "Seat R2-1 · Balcony · $30.00",
+    );
+  });
+
+  it("leaves out the section heading for a plain block of seats", async () => {
+    for (const seat of db.seats.get(1) ?? []) seat.section = "General";
+    renderApp("/events/1");
+    await seatButton("R1-1");
+    expect(screen.queryByRole("region", { name: "General" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { level: 3 })).not.toBeInTheDocument();
+  });
+
   it("adds up the seats you pick", async () => {
     const { user } = renderApp("/events/1", { apiKey: "key-user-1" });
     await user.click(await seatButton("R1-1"));

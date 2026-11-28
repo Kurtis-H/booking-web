@@ -44,3 +44,24 @@ export function groupByRow(seats: readonly Seat[]): Map<string, Seat[]> {
   }
   return rows;
 }
+
+/**
+ * Seats by section (price tier), front to back. Seat ids follow seating order,
+ * so sorting by id puts sections, rows and seats in the order a venue has them.
+ */
+export function groupBySection(seats: readonly Seat[]): Map<string, Seat[]> {
+  const sections = new Map<string, Seat[]>();
+  for (const seat of [...seats].sort((a, b) => a.id - b.id)) {
+    const list = sections.get(seat.section);
+    if (list) list.push(seat);
+    else sections.set(seat.section, [seat]);
+  }
+  return sections;
+}
+
+/** "$90.00", or "From $25.00" when a section's rows are priced differently. */
+export function sectionPrice(seats: readonly Seat[], format: (cents: number) => string): string {
+  const prices = seats.map((seat) => seat.price_cents);
+  const low = Math.min(...prices);
+  return low === Math.max(...prices) ? format(low) : `From ${format(low)}`;
+}
