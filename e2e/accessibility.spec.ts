@@ -23,6 +23,19 @@ test("event page with seats selected", async ({ signedInPage: page, newEvent }) 
   await expectNoViolations(page);
 });
 
+// Each event gets one of six colors by its id, so a single event only ever tests one.
+// Six events in a row cover every color: a contrast problem on one of them
+// (white text on amber was one) can't hide behind whichever id a run happens to get.
+test("every event color passes contrast", async ({ signedInPage: page, newEvent }) => {
+  for (let i = 0; i < 6; i++) {
+    const event = await newEvent(4);
+    await page.goto(`/events/${event.id}`);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.getByRole("meter")).toBeVisible();
+    await expectNoViolations(page);
+  }
+});
+
 test("sign in, with an error showing", async ({ page }) => {
   await page.goto("/signin");
   await page.getByRole("button", { name: "Sign in" }).click();

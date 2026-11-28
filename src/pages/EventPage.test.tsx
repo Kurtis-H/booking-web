@@ -66,6 +66,30 @@ describe("EventPage", () => {
     );
     expect(screen.getByTestId("order-total")).toHaveTextContent("$0.00");
     expect(db.orders).toHaveLength(0);
+    // The lost seat stays on the map, greyed out, instead of leaving a gap.
+    expect(await screen.findByRole("img", { name: "Seat R1-1, sold" })).toBeInTheDocument();
+  });
+
+  it("shows sold seats in place, and they can't be picked", async () => {
+    sellBehindTheScenes(2);
+    const { user } = renderApp("/events/1", { apiKey: "key-user-1" });
+    const sold = await screen.findByRole("img", { name: "Seat R1-2, sold" });
+    expect(screen.queryByRole("button", { name: /^Seat R1-2,/ })).not.toBeInTheDocument();
+    await user.click(sold);
+    expect(screen.getByTestId("order-total")).toHaveTextContent("$0.00");
+    // Seats keep their order along the row: 1, then the sold 2, then 3.
+    const row = screen.getByTestId("seat-map");
+    const order = [...row.querySelectorAll(".seat")].slice(0, 3).map((el) => el.textContent);
+    expect(order).toEqual(["1", "2", "3"]);
+    expect(screen.getByRole("list", { name: "Seat key" })).toHaveTextContent("AvailableSelectedSold");
+  });
+
+  it("carries the event onto the confirmation ticket", async () => {
+    const { user } = renderApp("/events/2", { apiKey: "key-user-1" });
+    await user.click(await seatButton("R1-3"));
+    await user.click(screen.getByRole("button", { name: "Buy 1 seat" }));
+    await screen.findByTestId("order-confirmation");
+    expect(screen.getByText(db.events[1]!.name, { selector: ".ticket-event" })).toBeInTheDocument();
   });
 
   it("tells you to wait when rate limited", async () => {

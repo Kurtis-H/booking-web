@@ -22,7 +22,9 @@ describe("OrdersPage", () => {
 
     const rows = await screen.findAllByTestId("order-row");
     expect(rows).toHaveLength(2);
-    expect(rows[0]).toHaveTextContent("Order #2 · 2 seats · $50.00");
+    expect(rows[0]).toHaveTextContent("Order #2");
+    expect(rows[0]).toHaveTextContent("2 seats: R1-2, R1-3");
+    expect(rows[0]).toHaveTextContent("$50.00");
 
     await user.click(screen.getByRole("link", { name: "Order #1" }));
     expect(await screen.findByRole("heading", { name: "Order #1" })).toBeInTheDocument();

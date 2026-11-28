@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router";
 import { App } from "./App";
 import { AuthProvider } from "./auth";
+import "@fontsource-variable/inter";
 import "./styles.css";
 
 const queryClient = new QueryClient({

@@ -103,8 +103,18 @@ export const api = {
   listEvents: (limit: number, offset: number, signal?: AbortSignal) =>
     request<EventPage>(`/events?limit=${limit}&offset=${offset}`, { signal }),
   getEvent: (id: number, signal?: AbortSignal) => request<EventSummary>(`/events/${id}`, { signal }),
-  listSeats: (id: number, limit: number, offset: number, signal?: AbortSignal) =>
-    request<SeatPage>(`/events/${id}/seats?limit=${limit}&offset=${offset}`, { signal }),
+  /** Available seats by default; "sold" lists the taken ones, so the map can show them. */
+  listSeats: (
+    id: number,
+    limit: number,
+    offset: number,
+    signal?: AbortSignal,
+    status: "available" | "sold" = "available",
+  ) =>
+    request<SeatPage>(
+      `/events/${id}/seats?limit=${limit}&offset=${offset}${status === "sold" ? "&status=sold" : ""}`,
+      { signal },
+    ),
   getStats: (id: number, signal?: AbortSignal) =>
     request<EventStats>(`/events/${id}/stats`, { signal }),
   createOrder: (seatIds: number[], apiKey: string) =>

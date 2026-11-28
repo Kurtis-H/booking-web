@@ -78,8 +78,11 @@ export const handlers = [
   http.get("*/api/events/:id/seats", ({ params, request }) => {
     const id = Number(params.id);
     if (!db.seats.has(id)) return notFound("Event");
-    const { limit, offset } = pageParams(new URL(request.url));
-    const items = available(id)
+    const url = new URL(request.url);
+    const { limit, offset } = pageParams(url);
+    const status = url.searchParams.get("status") ?? "available";
+    const items = (db.seats.get(id) ?? [])
+      .filter((s) => s.status === status)
       .slice(offset, offset + limit)
       .map(({ eventId: _e, ...seat }) => seat);
     return HttpResponse.json({ items, limit, offset });

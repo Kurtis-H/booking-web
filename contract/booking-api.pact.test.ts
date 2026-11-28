@@ -123,6 +123,34 @@ describe("booking-web needs from the booking API", () => {
     });
   });
 
+  it("the sold seats of an event, so the map can show them as taken", () => {
+    provider
+      .given("a seat has already been sold")
+      .uponReceiving("a request for an event's sold seats")
+      .withRequest({
+        method: "GET",
+        path: fromProviderState("/events/${eventId}/seats", "/events/1/seats"),
+        query: { limit: String(SEATS_PER_PAGE), offset: "0", status: "sold" },
+        headers: { Accept: "application/json" },
+      })
+      .willRespondWith({
+        status: 200,
+        body: {
+          items: eachLike({
+            id: integer(1),
+            label: string("R1-1"),
+            price_cents: integer(3500),
+            status: regex("sold", "sold"),
+          }),
+          offset: integer(0),
+        },
+      });
+    return provider.executeTest(async (mock) => {
+      const page = await asApp(() => api.listSeats(1, SEATS_PER_PAGE, 0, undefined, "sold"), mock.url);
+      expect(page.items[0]?.status).toBe("sold");
+    });
+  });
+
   it("buying a seat", () => {
     provider
       .given("an event with available seats exists")
