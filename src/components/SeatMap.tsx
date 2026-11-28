@@ -45,7 +45,9 @@ export function SeatMap({ seats, sold = [], selected, onToggle }: Props) {
           Selected
         </li>
         <li>
-          <span className="seat-swatch sold" aria-hidden="true" />
+          <span className="seat-swatch sold" aria-hidden="true">
+            ✕
+          </span>
           Sold
         </li>
       </ul>
@@ -82,7 +84,7 @@ export function SeatMap({ seats, sold = [], selected, onToggle }: Props) {
                       aria-label={`Seat ${seat.label}, sold`}
                       data-testid={`seat-${seat.label}`}
                     >
-                      {number}
+                      ✕
                     </span>
                   ) : (
                     <button
