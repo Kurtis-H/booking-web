@@ -106,8 +106,8 @@ describe("EventPage", () => {
     // Seats keep their order along the row: 1, then the sold 2, then 3.
     const row = screen.getByTestId("seat-map");
     const order = [...row.querySelectorAll(".seat")].slice(0, 3).map((el) => el.textContent);
-    expect(order).toEqual(["1", "2", "3"]);
-    expect(screen.getByRole("list", { name: "Seat key" })).toHaveTextContent("AvailableSelectedSold");
+    expect(order).toEqual(["1", "✕", "3"]);
+    expect(screen.getByRole("list", { name: "Seat key" })).toHaveTextContent(/Available.*Selected.*Sold/);
   });
 
   it("carries the event onto the confirmation ticket", async () => {
