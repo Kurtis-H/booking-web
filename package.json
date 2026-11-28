@@ -14,6 +14,8 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "e2e": "playwright test",
+    "visual": "playwright test -c playwright.visual.config.ts",
+    "visual:update": "playwright test -c playwright.visual.config.ts --update-snapshots",
     "api:types": "openapi-typescript ${API_URL:-http://localhost:8000}/openapi.json -o src/api/schema.d.ts",
     "test:contract": "node -e \"require('fs').rmSync('pacts',{recursive:true,force:true})\" && vitest run -c vitest.contract.config.ts"
   },

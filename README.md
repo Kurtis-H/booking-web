@@ -31,6 +31,7 @@ A React and TypeScript web app for buying event seats. It is the front end for t
 | Component | Vitest + Testing Library + MSW | Every page through the whole app, against an in-memory fake of the API that follows the real API's rules (401, 404, 409) |
 | End to end | Playwright, desktop and mobile | The built app against the **real** API and Postgres: buy seats, lose a seat to another buyer, can't read someone else's order |
 | Accessibility | axe-core in Playwright | No WCAG 2.1 A/AA violations on any main screen, in every event color, plus a keyboard-only purchase |
+| Visual regression | Playwright screenshots, desktop and mobile | 9 key screens, including the error and empty states, match their approved screenshots. A fixed fake API keeps every pixel the same between runs |
 | Security headers | Playwright | CSP and framing protection are sent, and a whole purchase causes no policy violation |
 | Contract | openapi-typescript | Types are generated from the API's OpenAPI spec. CI regenerates them from the live API and fails if the API has changed shape |
 | Consumer contract | Pact | What this app needs from the API: 10 interactions recorded through the app's own client, including the 401, 404 and 409 it handles. The API's CI replays them (see below) |
@@ -68,6 +69,7 @@ Every push and pull request runs:
 * **Lint, types and unit tests:** ESLint, `tsc`, Vitest with coverage, the Pact consumer contract (and a check that the committed contract is current), build, `npm audit`
 * **Contract holds against the current API:** this branch's Pact contract, verified by api-performance-lab's provider test
 * **End-to-end against the real API:** installs api-performance-lab, starts Postgres and the API, runs Playwright on desktop and mobile
+* **Visual regression:** compares every screen with its approved screenshot, then plants four small styling changes one at a time and requires the suite to catch each
 * **Types match the API's OpenAPI spec:** regenerates the types from the running API and fails on any difference
 * **CodeQL** for the TypeScript and the workflows; Dependabot for npm and Actions
 
@@ -105,6 +107,22 @@ npm run test:contract     # regenerates pacts/; CI fails if the committed file d
 
 - A page that times out shows its usual load error, after one retry.
 - An order that times out, or gets a `503`, may still have gone through, so the message says so and points to "My orders" before trying again. Orders are never retried automatically.
+
+## Visual regression
+
+`npm run visual` builds the app and compares 9 screens with approved screenshots, on desktop (1280x800) and a Pixel 7. Covered: the event list, the seat map with seats selected, a seat taken by someone else (409), a busy service (503), a sold-out event, loading, the order confirmation, my orders and sign in.
+
+The screenshots must be identical from run to run, so the tests don't use the real API. Every request is answered from fixed data (`visual/fakeApi.ts`), and the clock and time zone are fixed. The only thing that can change a screenshot is the app.
+
+**Proving it catches regressions.** `node scripts/prove-visual.mjs` plants four changes in the stylesheet, one at a time, and requires the suite to fail on each:
+* seats 2px further apart
+* the accent color one shade lighter
+* card corners 4px less rounded
+* error text in the body color
+
+With Playwright's default tolerance (a per-pixel color threshold of 0.2), the accent color and the corners both **passed**. A rebrand or a design-token slip would have gone unnoticed. The suite now allows a 0.05 color difference and at most 10 differing pixels per screenshot. That works because the baselines come from the same CI runner image every time.
+
+**Changing the look on purpose.** Run the CI workflow by hand with "Make new visual baselines" ticked. Then download the `visual-baselines` artifact, look at the images, and commit them to `visual/__screenshots__/`. The diff in the pull request shows exactly what changed. When a comparison fails, the `visual-diffs` artifact has the expected, actual and diff image for each screen.
 
 ## Security headers
 
