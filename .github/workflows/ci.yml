@@ -149,6 +149,13 @@ jobs:
         with:
           name: visual-baselines
           path: visual/__screenshots__/
+      - name: Print the new baselines (for environments that can read logs but not artifacts)
+        if: inputs.update_visual_baselines
+        run: |
+          echo "----- BEGIN VISUAL BASELINES (tar.gz, base64) -----"
+          tar czf - visual/__screenshots__ | base64 -w 0
+          echo
+          echo "----- END VISUAL BASELINES -----"
       - name: Compare every screen with its approved screenshot
         run: npm run visual
       - name: Prove planted styling regressions are caught
