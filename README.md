@@ -122,7 +122,11 @@ The screenshots must be identical from run to run, so the tests don't use the re
 
 With Playwright's default tolerance (a per-pixel color threshold of 0.2), the accent color and the corners both **passed**. A rebrand or a design-token slip would have gone unnoticed. The suite now allows a 0.05 color difference and at most 10 differing pixels per screenshot. That works because the baselines come from the same CI runner image every time.
 
-**Changing the look on purpose.** Run the CI workflow by hand with "Make new visual baselines" ticked. Then download the `visual-baselines` artifact, look at the images, and commit them to `visual/__screenshots__/`. The diff in the pull request shows exactly what changed. When a comparison fails, the `visual-diffs` artifact has the expected, actual and diff image for each screen.
+**Where baselines come from.** The CI runner makes them. Its font rendering differs from other Linux machines by 1 to 3% of pixels, so baselines made anywhere else would always fail. Across separate CI runs, the screenshots come out byte-identical.
+
+**Changing the look on purpose.** Run the CI workflow by hand with "Make new visual baselines" ticked. Then download the `visual-baselines` artifact, look at the images, and commit them to `visual/__screenshots__/`. The job also prints them to its log as a base64 tar.gz, for environments that can read logs but not artifacts. The diff in the pull request shows exactly what changed. When a comparison fails, the `visual-diffs` artifact has the expected, actual and diff image for each screen.
+
+**It found a bug on its first run.** The first CI baseline of the phone seat map showed row labels scrolled out of view ("ow A") after the map scrolled sideways to a selected seat. Row labels now stay pinned to the left edge.
 
 ## Security headers
 
