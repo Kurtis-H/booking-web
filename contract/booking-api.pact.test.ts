@@ -113,6 +113,10 @@ describe("booking-web needs from the booking API", () => {
             label: string("R1-1"),
             price_cents: integer(3500),
             status: regex("available|sold", "available"),
+            // The map lays seats out by section and row, and shows the number.
+            section: string("Orchestra"),
+            row: string("R1"),
+            number: integer(1),
           }),
           offset: integer(0),
         },
@@ -141,6 +145,10 @@ describe("booking-web needs from the booking API", () => {
             label: string("R1-1"),
             price_cents: integer(3500),
             status: regex("sold", "sold"),
+            // The map lays seats out by section and row, and shows the number.
+            section: string("Orchestra"),
+            row: string("R1"),
+            number: integer(1),
           }),
           offset: integer(0),
         },

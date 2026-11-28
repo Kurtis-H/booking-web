@@ -152,22 +152,6 @@ export interface components {
             /** Seats */
             seats: number;
         };
-        /** EventIn */
-        EventIn: {
-            /** Name */
-            name: string;
-            /** Venue */
-            venue: string;
-            /**
-             * Starts At
-             * Format: date-time
-             */
-            starts_at: string;
-            /** Seats */
-            seats: number;
-            /** Price Cents */
-            price_cents: number;
-        };
         /** EventOut */
         EventOut: {
             /** Id */
@@ -217,6 +201,26 @@ export interface components {
             status: string;
             /** Bugs */
             bugs: string[];
+        };
+        /**
+         * LayoutEventIn
+         * @description An event with a venue layout: sections front to back, each a price tier.
+         *
+         *     Row letters run on across sections, so the second section starts where the
+         *     first ended.
+         */
+        LayoutEventIn: {
+            /** Name */
+            name: string;
+            /** Venue */
+            venue: string;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /** Sections */
+            sections: components["schemas"]["SectionIn"][];
         };
         /** OrderIn */
         OrderIn: {
@@ -273,6 +277,21 @@ export interface components {
             price_cents: number;
             /** Status */
             status: string;
+            /**
+             * Section
+             * @description The price tier the seat is in, such as "Orchestra".
+             */
+            section: string;
+            /**
+             * Row
+             * @description The row, such as "A". Rows run on across sections.
+             */
+            row: string;
+            /**
+             * Number
+             * @description The seat's number in its row.
+             */
+            number: number | null;
         };
         /** SeatPage */
         SeatPage: {
@@ -282,6 +301,39 @@ export interface components {
             limit: number | null;
             /** Offset */
             offset: number;
+        };
+        /**
+         * SectionIn
+         * @description One price tier of a venue: a block of rows, all at one price.
+         */
+        SectionIn: {
+            /** Name */
+            name: string;
+            /** Rows */
+            rows: number;
+            /** Seats Per Row */
+            seats_per_row: number;
+            /** Price Cents */
+            price_cents: number;
+        };
+        /**
+         * SimpleEventIn
+         * @description An event with one block of seats at one price, in row "S".
+         */
+        SimpleEventIn: {
+            /** Name */
+            name: string;
+            /** Venue */
+            venue: string;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /** Seats */
+            seats: number;
+            /** Price Cents */
+            price_cents: number;
         };
         /** ValidationError */
         ValidationError: {
@@ -676,7 +728,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["EventIn"];
+                "application/json": components["schemas"]["SimpleEventIn"] | components["schemas"]["LayoutEventIn"];
             };
         };
         responses: {

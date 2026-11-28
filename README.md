@@ -7,11 +7,12 @@ A React and TypeScript web app for buying event seats. It is the front end for t
 
 | Browse events | Pick seats | Confirmation |
 |---|---|---|
-| ![Event list](docs/events.png) | ![Seat map with three seats selected](docs/seat-map.png) | ![Order confirmed](docs/confirmation.png) |
+| ![Event list](docs/events.png) | ![Theater seat map with Orchestra, Mezzanine and Balcony sections, three seats selected](docs/seat-map.png) | ![Order confirmed](docs/confirmation.png) |
 
 ## What it does
 
 * Browse upcoming events, a page at a time, with how many seats are left.
+* Venues are laid out in sections (Orchestra, Mezzanine, Balcony), each a price tier with its own color and price. Rows stay on one line and are centered, so the map tapers like a real theater; on a phone a wide section scrolls sideways. A plain block of seats has no section heading.
 * Pick up to 10 seats on a seat map and see the running total. Sold seats stay on the map, greyed out and unselectable, so rows keep their shape; a key shows available, selected and sold.
 * Buy them and get a ticket-style confirmation with the event, seats and total; see your past orders.
 * On a phone, the order total and the Buy button stay pinned to the bottom of the screen while you pick seats.

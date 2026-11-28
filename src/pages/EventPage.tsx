@@ -157,7 +157,9 @@ export function EventPage() {
                 .filter((seat) => selected.includes(seat.id))
                 .map((seat) => (
                   <li key={seat.id}>
-                    Seat {seat.label} · {formatCents(seat.price_cents)}
+                    Seat {seat.label}
+                    {seat.section !== "General" && ` · ${seat.section}`} ·{" "}
+                    {formatCents(seat.price_cents)}
                   </li>
                 ))}
             </ul>

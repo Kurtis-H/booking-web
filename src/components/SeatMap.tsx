@@ -1,6 +1,7 @@
+import { useId } from "react";
 import type { Seat } from "../api/client";
 import { formatCents } from "../lib/format";
-import { groupByRow } from "../lib/selection";
+import { groupByRow, groupBySection, sectionPrice } from "../lib/selection";
 
 type Props = {
   seats: readonly Seat[];
@@ -10,19 +11,28 @@ type Props = {
   onToggle: (seatId: number) => void;
 };
 
-const seatNumber = (seat: Seat) => Number(seat.label.split("-")[1] ?? Number.NaN);
+/** A plain block of seats has one section, "General", and no section heading. */
+const isPlainBlock = (sections: Map<string, Seat[]>) =>
+  sections.size === 1 && sections.has("General");
 
-/** Seats by row: available ones are toggle buttons, sold ones are greyed out and can't be picked. */
+/**
+ * The venue, front to back: sections (price tiers) of lettered rows. Available
+ * seats are toggle buttons; sold ones are greyed out in place and can't be picked.
+ */
 export function SeatMap({ seats, sold = [], selected, onToggle }: Props) {
+  const id = useId();
   if (seats.length === 0) {
     return <p>No seats are available for this event.</p>;
   }
   const chosen = new Set(selected);
   const soldIds = new Set(sold.map((seat) => seat.id));
   const availableIds = new Set(seats.map((seat) => seat.id));
-  const all = [...seats, ...sold.filter((seat) => !availableIds.has(seat.id))].sort(
-    (a, b) => (seatNumber(a) || 0) - (seatNumber(b) || 0),
-  );
+  const sections = groupBySection([
+    ...seats,
+    ...sold.filter((seat) => !availableIds.has(seat.id)),
+  ]);
+  const headed = !isPlainBlock(sections);
+
   return (
     <div className="seat-map" data-testid="seat-map">
       <ul className="seat-legend" aria-label="Seat key">
@@ -42,36 +52,59 @@ export function SeatMap({ seats, sold = [], selected, onToggle }: Props) {
       <div className="stage" aria-hidden="true">
         Stage
       </div>
-      {[...groupByRow(all)].map(([row, rowSeats]) => (
-        <fieldset key={row} className="seat-row">
-          <legend>Row {row.replace(/^R/, "")}</legend>
-          {rowSeats.map((seat) =>
-            soldIds.has(seat.id) ? (
-              <span
-                key={seat.id}
-                role="img"
-                className="seat sold"
-                aria-label={`Seat ${seat.label}, sold`}
-                data-testid={`seat-${seat.label}`}
-              >
-                {seat.label.split("-")[1] ?? seat.label}
-              </span>
-            ) : (
-              <button
-                key={seat.id}
-                type="button"
-                className="seat"
-                aria-pressed={chosen.has(seat.id)}
-                aria-label={`Seat ${seat.label}, ${formatCents(seat.price_cents)}`}
-                data-testid={`seat-${seat.label}`}
-                onClick={() => onToggle(seat.id)}
-              >
-                {seat.label.split("-")[1] ?? seat.label}
-              </button>
-            ),
-          )}
-        </fieldset>
-      ))}
+      {[...sections].map(([name, sectionSeats], tier) => {
+        const headingId = `${id}-section-${tier}`;
+        return (
+          <section
+            key={name}
+            className={`seat-section tier-${tier % 4}${headed ? " headed" : ""}`}
+            aria-labelledby={headed ? headingId : undefined}
+            data-testid={`section-${name}`}
+          >
+            {headed && (
+              <header className="seat-section-head">
+                <h3 id={headingId}>{name}</h3>
+                <p>{sectionPrice(sectionSeats, formatCents)}</p>
+              </header>
+            )}
+            <div className="seat-rows">
+              <div className="seat-rows-inner">
+            {[...groupByRow(sectionSeats)].map(([row, rowSeats]) => (
+              <fieldset key={row} className="seat-row">
+                <legend>Row {row.replace(/^R/, "")}</legend>
+                {rowSeats.map((seat) => {
+                  const number = seat.number ?? seat.label.split("-")[1] ?? seat.label;
+                  return soldIds.has(seat.id) ? (
+                    <span
+                      key={seat.id}
+                      role="img"
+                      className="seat sold"
+                      aria-label={`Seat ${seat.label}, sold`}
+                      data-testid={`seat-${seat.label}`}
+                    >
+                      {number}
+                    </span>
+                  ) : (
+                    <button
+                      key={seat.id}
+                      type="button"
+                      className="seat"
+                      aria-pressed={chosen.has(seat.id)}
+                      aria-label={`Seat ${seat.label}, ${formatCents(seat.price_cents)}`}
+                      data-testid={`seat-${seat.label}`}
+                      onClick={() => onToggle(seat.id)}
+                    >
+                      {number}
+                    </button>
+                  );
+                })}
+              </fieldset>
+            ))}
+              </div>
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }

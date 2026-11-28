@@ -150,7 +150,10 @@
               {
                 "id": 1,
                 "label": "R1-1",
+                "number": 1,
                 "price_cents": 3500,
+                "row": "R1",
+                "section": "Orchestra",
                 "status": "available"
               }
             ],
@@ -191,11 +194,35 @@
                 }
               ]
             },
+            "$.items[*].number": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
             "$.items[*].price_cents": {
               "combine": "AND",
               "matchers": [
                 {
                   "match": "integer"
+                }
+              ]
+            },
+            "$.items[*].row": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.items[*].section": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
                 }
               ]
             },
@@ -273,7 +300,10 @@
               {
                 "id": 1,
                 "label": "R1-1",
+                "number": 1,
                 "price_cents": 3500,
+                "row": "R1",
+                "section": "Orchestra",
                 "status": "sold"
               }
             ],
@@ -314,11 +344,35 @@
                 }
               ]
             },
+            "$.items[*].number": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
             "$.items[*].price_cents": {
               "combine": "AND",
               "matchers": [
                 {
                   "match": "integer"
+                }
+              ]
+            },
+            "$.items[*].row": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.items[*].section": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
                 }
               ]
             },

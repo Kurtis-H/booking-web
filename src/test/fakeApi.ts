@@ -34,6 +34,10 @@ export function resetDb({ events = 30, seatsPerEvent = 24 } = {}): void {
         label: `R${Math.floor(n / 12) + 1}-${(n % 12) + 1}`,
         price_cents: 2500 + Math.floor(n / 12) * 500,
         status: "available",
+        // The real API's seed data: the front rows are the Orchestra.
+        section: n < 12 ? "Orchestra" : "Balcony",
+        row: `R${Math.floor(n / 12) + 1}`,
+        number: (n % 12) + 1,
       })),
     );
   }

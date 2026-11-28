@@ -1,12 +1,22 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Seat } from "../api/client";
-import { groupByRow, MAX_SEATS_PER_ORDER, toggleSeat, totalCents } from "./selection";
+import {
+  groupByRow,
+  groupBySection,
+  MAX_SEATS_PER_ORDER,
+  sectionPrice,
+  toggleSeat,
+  totalCents,
+} from "./selection";
 
-const seat = (id: number, label: string, price_cents = 1000): Seat => ({
+const seat = (id: number, label: string, price_cents = 1000, section = "General"): Seat => ({
   id,
   label,
   price_cents,
   status: "available",
+  section,
+  row: label.split("-")[0] ?? label,
+  number: Number(label.split("-")[1]) || null,
 });
 
 describe("toggleSeat", () => {
@@ -86,5 +96,27 @@ describe("the planted bug switch (used by framework-showdown)", () => {
   it("ignores any other value", () => {
     vi.stubEnv("VITE_PLANTED_BUG", "something-else");
     expect(totalCents(seats, [1, 2])).toBe(5500);
+  });
+});
+
+describe("groupBySection", () => {
+  it("puts sections, and the seats in them, in seating order", () => {
+    const sections = groupBySection([
+      seat(4, "C-1", 4000, "Balcony"),
+      seat(2, "A-2", 9000, "Orchestra"),
+      seat(1, "A-1", 9000, "Orchestra"),
+    ]);
+    expect([...sections.keys()]).toEqual(["Orchestra", "Balcony"]);
+    expect(sections.get("Orchestra")!.map((s) => s.id)).toEqual([1, 2]);
+  });
+});
+
+describe("sectionPrice", () => {
+  const format = (cents: number) => `$${cents / 100}`;
+  it("gives the one price when every seat costs the same", () => {
+    expect(sectionPrice([seat(1, "A-1", 9000), seat(2, "A-2", 9000)], format)).toBe("$90");
+  });
+  it("gives the lowest price when rows differ", () => {
+    expect(sectionPrice([seat(1, "A-1", 9000), seat(2, "B-1", 7500)], format)).toBe("From $75");
   });
 });
