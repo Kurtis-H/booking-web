@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await api.listOrders(trimmed); // a cheap call that needs a valid key
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
-        throw new Error("That API key wasn't recognised.");
+        throw new Error("That API key wasn't recognized.");
       }
       throw new Error("We couldn't reach the booking service. Please try again.");
     }

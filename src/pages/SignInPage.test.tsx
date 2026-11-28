@@ -8,7 +8,7 @@ describe("SignInPage", () => {
     const { user } = renderApp("/signin");
     await user.type(screen.getByLabelText("API key"), "key-nobody");
     await user.click(screen.getByRole("button", { name: "Sign in" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("That API key wasn't recognised.");
+    expect(await screen.findByRole("alert")).toHaveTextContent("That API key wasn't recognized.");
     expect(screen.getByLabelText("API key")).toHaveAttribute("aria-invalid", "true");
   });
 

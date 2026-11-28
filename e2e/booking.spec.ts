@@ -86,5 +86,5 @@ test("an unknown API key is refused", async ({ page }) => {
   await page.goto("/signin");
   await page.getByLabel("API key").fill("key-not-real");
   await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByRole("alert")).toHaveText("That API key wasn't recognised.");
+  await expect(page.getByRole("alert")).toHaveText("That API key wasn't recognized.");
 });
