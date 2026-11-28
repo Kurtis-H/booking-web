@@ -10,6 +10,10 @@ export function Layout() {
       </a>
       <header className="site-header">
         <Link to="/" className="brand">
+          <svg className="brand-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M4 7a2 2 0 0 0 2-2h12a2 2 0 0 0 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 0-2 2H6a2 2 0 0 0-2-2v-3a2 2 0 0 0 0-4z" />
+            <path d="M14 5v14" strokeDasharray="2 2" />
+          </svg>
           Booking
         </Link>
         <nav aria-label="Main">
@@ -29,6 +33,11 @@ export function Layout() {
       <main id="main" tabIndex={-1}>
         <Outlet />
       </main>
+      <footer className="site-footer">
+        <p>
+          A demo ticketing app, built and tested as part of a QA portfolio. No real tickets are sold.
+        </p>
+      </footer>
     </>
   );
 }

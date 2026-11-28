@@ -36,36 +36,38 @@ export function SignInPage() {
   };
 
   return (
-    <>
-      <h1>Sign in</h1>
-      <form onSubmit={onSubmit} className="card form" noValidate>
-        <label htmlFor="api-key">API key</label>
-        <input
-          id="api-key"
-          name="api-key"
-          type="password"
-          autoComplete="off"
-          value={key}
-          onChange={(e) => setKey(e.target.value)}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={error ? "signin-error" : undefined}
-        />
-        {error && (
-          <p id="signin-error" role="alert" className="error">
-            {error}
-          </p>
-        )}
-        <button type="submit" className="primary" disabled={busy}>
-          {busy ? "Signing in…" : "Sign in"}
-        </button>
-      </form>
-      <p className="muted">
-        This is a demo of the booking API. You can sign in as a test buyer:{" "}
-        <button type="button" className="link-button" onClick={() => void attempt(DEMO_KEY)}>
-          use the demo account
-        </button>
-        .
-      </p>
-    </>
+    <section className="signin">
+      <div className="card signin-card">
+        <h1>Sign in</h1>
+        <p className="muted">Sign in to buy seats and see your orders.</p>
+        <form onSubmit={onSubmit} className="form" noValidate>
+          <label htmlFor="api-key">API key</label>
+          <input
+            id="api-key"
+            name="api-key"
+            type="password"
+            autoComplete="off"
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? "signin-error" : undefined}
+          />
+          {error && (
+            <p id="signin-error" role="alert" className="error">
+              {error}
+            </p>
+          )}
+          <button type="submit" className="primary" disabled={busy}>
+            {busy ? "Signing in…" : "Sign in"}
+          </button>
+        </form>
+        <div className="demo">
+          <p className="muted">This is a demo of the booking API. No account? Sign in as a test buyer:</p>
+          <button type="button" className="secondary" onClick={() => void attempt(DEMO_KEY)}>
+            use the demo account
+          </button>
+        </div>
+      </div>
+    </section>
   );
 }

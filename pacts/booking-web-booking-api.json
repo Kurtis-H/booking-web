@@ -223,6 +223,129 @@
       "type": "Synchronous/HTTP"
     },
     {
+      "description": "a request for an event's sold seats",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "a seat has already been sold"
+        }
+      ],
+      "request": {
+        "generators": {
+          "path": {
+            "expression": "/events/${eventId}/seats",
+            "type": "ProviderState"
+          }
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "path": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          }
+        },
+        "method": "GET",
+        "path": "/events/1/seats",
+        "query": {
+          "limit": [
+            "100"
+          ],
+          "offset": [
+            "0"
+          ],
+          "status": [
+            "sold"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "content": {
+            "items": [
+              {
+                "id": 1,
+                "label": "R1-1",
+                "price_cents": 3500,
+                "status": "sold"
+              }
+            ],
+            "offset": 0
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.items": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.items[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.items[*].label": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.items[*].price_cents": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.items[*].status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "sold"
+                }
+              ]
+            },
+            "$.offset": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
       "description": "a request for one of the buyer's orders",
       "pending": false,
       "providerStates": [

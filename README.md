@@ -12,13 +12,15 @@ A React and TypeScript web app for buying event seats. It is the front end for t
 ## What it does
 
 * Browse upcoming events, a page at a time, with how many seats are left.
-* Pick up to 10 seats on a seat map and see the running total.
-* Buy them and get a confirmation; see your past orders.
+* Pick up to 10 seats on a seat map and see the running total. Sold seats stay on the map, greyed out and unselectable, so rows keep their shape; a key shows available, selected and sold.
+* Buy them and get a ticket-style confirmation with the event, seats and total; see your past orders.
+* On a phone, the order total and the Buy button stay pinned to the bottom of the screen while you pick seats.
 * Handle the things that go wrong in real ticketing:
   * **Someone else buys your seat first (409):** explain, refresh the seat map and clear the selection.
   * **Rate limited (429):** say how long to wait (from `Retry-After`) and keep the selection.
   * **Session ended (401)**, **missing event or order (404)**, **network failure**: a clear message every time, never a blank screen.
-* Keyboard and screen-reader friendly: every seat is a labeled toggle button ("Seat R2-5, $30.00", `aria-pressed`), rows are grouped, errors are announced.
+* Keyboard and screen-reader friendly: every seat is a labeled toggle button ("Seat R2-5, $30.00", `aria-pressed`), sold seats are read out as "Seat R2-6, sold", rows are grouped, errors are announced.
+* Each event has its own color, used on its card, its page and its ticket. All six colors are checked for contrast on every run.
 
 ## How it's tested
 
@@ -27,10 +29,10 @@ A React and TypeScript web app for buying event seats. It is the front end for t
 | Unit | Vitest | Seat selection rules (10-seat limit, totals, rows), money and date formatting, error messages, the API client and its 10 second time limit |
 | Component | Vitest + Testing Library + MSW | Every page through the whole app, against an in-memory fake of the API that follows the real API's rules (401, 404, 409) |
 | End to end | Playwright, desktop and mobile | The built app against the **real** API and Postgres: buy seats, lose a seat to another buyer, can't read someone else's order |
-| Accessibility | axe-core in Playwright | No WCAG 2.1 A/AA violations on any main screen, plus a keyboard-only purchase |
+| Accessibility | axe-core in Playwright | No WCAG 2.1 A/AA violations on any main screen, in every event color, plus a keyboard-only purchase |
 | Security headers | Playwright | CSP and framing protection are sent, and a whole purchase causes no policy violation |
 | Contract | openapi-typescript | Types are generated from the API's OpenAPI spec. CI regenerates them from the live API and fails if the API has changed shape |
-| Consumer contract | Pact | What this app needs from the API: 9 interactions recorded through the app's own client, including the 401, 404 and 409 it handles. The API's CI replays them (see below) |
+| Consumer contract | Pact | What this app needs from the API: 10 interactions recorded through the app's own client, including the 401, 404 and 409 it handles. The API's CI replays them (see below) |
 | Static | TypeScript strict, ESLint (incl. jsx-a11y), CodeQL, npm audit | |
 
 Unit and component tests need 80% coverage to pass (currently about 98% of lines). Tests use roles and accessible names first (`getByRole("button", { name: "Buy 2 seats" })`), and `data-testid` only for things with no natural role, like the order summary.
